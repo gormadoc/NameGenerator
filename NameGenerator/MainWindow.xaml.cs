@@ -23,6 +23,17 @@ namespace NameGenerator
         public MainWindow()
         {
             InitializeComponent();
+            model.FeedList(testList);
+            model.CreateMarkovSpace();
+            
+            for(int i = 0; i < 30; i++)
+            {
+                Console.Out.WriteLine(model.GenerateString());
+            }
+
         }
+
+        List<string> testList = new List<string> { "example", "eaample", "eample", "haiduke", "giant", "otter" };
+        MarkovSpace model = new MarkovSpace(0,2,0);
     }
 }
