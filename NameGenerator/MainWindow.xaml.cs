@@ -25,15 +25,16 @@ namespace NameGenerator
             InitializeComponent();
             model.FeedList(testList);
             model.CreateMarkovSpace();
-            
+            parser.ChangeParameters(0, 3, 0);
+            parser.ParseFile("F:\\Documents\\Visual Studio 2017\\Projects\\NameGenerator\\NameGenerator\\lists\\Vantesh.txt");
             for(int i = 0; i < 30; i++)
             {
-                Console.Out.WriteLine(model.GenerateString());
+                Console.Out.WriteLine(parser.GenerateWord(true));
             }
-
         }
 
         List<string> testList = new List<string> { "example", "eaample", "eample", "haiduke", "giant", "otter" };
-        MarkovSpace model = new MarkovSpace(0,2,0);
+        MarkovSpace model = new MarkovSpace(0,3,0);
+        LanguageFileParser parser = new LanguageFileParser();
     }
 }

@@ -33,6 +33,40 @@ namespace NameGenerator
             }
         }
 
+        // Bad parameters will be thrown out in favor of the default (randomness = 0; order = 1; prior = 0)
+        public void ChangeParameters(double randomness, int order, double prior)
+        {
+            // Set randomness to a value between 0 and 1 (default 0)
+            if (randomness > 0 && randomness < 1)
+            {
+                random_factor = randomness;
+            }
+            else
+            {
+                random_factor = 0;
+            }
+
+            // Set chain order to an allowed value (default 1)
+            if (order > 0 && order < 6)
+            {
+                chain_order = order;
+            }
+            else
+            {
+                chain_order = 1;
+            }
+
+            // Set Bayesian prior to an allowed value
+            if (prior > 0 && prior < 0.5)
+            {
+                bayesian_prior = prior;
+            }
+            else
+            {
+                bayesian_prior = 0;
+            }
+        }
+
         /* Utilities */
 
         // Increment key in dictionary or set it to one
@@ -193,13 +227,13 @@ namespace NameGenerator
         private readonly Random random = new Random();
 
         // Chance of random factors appearing (length or new characters appearing)
-        private readonly double random_factor = 0;
+        private double random_factor = 0;
 
         // Order of Markov chain
-        private readonly int chain_order = 1;
+        private int chain_order = 1;
 
         // Bayesian prior (slight blurring of proportions)
-        private readonly double bayesian_prior = 0;
+        private double bayesian_prior = 0;
 
         /*
          * All the lists that will be parsed and the methods to initialize them
@@ -260,7 +294,7 @@ namespace NameGenerator
         /// <summary>
         /// Returns a random word length based on the weights of each 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns a randomly chosen word length</returns>
         public int GetRandomWordLength()
         {
             // Return NULL if dictionary isn't initialized yet
@@ -288,9 +322,7 @@ namespace NameGenerator
             return 0;
         }
 
-        /*
-         *  The dictionaries that hold the parsed information and the methods to initialize them
-         */
+        /* The dictionaries that hold the parsed information and the methods to initialize them */
 
         // Holds all possible strings and determines the next likely character
         private readonly Dictionary<string, Dictionary<char, int>> stringProbabilityPairs = new Dictionary<string, Dictionary<char, int>>();
@@ -301,7 +333,7 @@ namespace NameGenerator
         /// <summary>
         /// Creates the Markov chain model
         /// </summary>
-        /// <returns>True if created, false if lists weren't initialized yet</returns>
+        /// <returns>Returns true if created, false if lists weren't initialized yet</returns>
         public bool CreateMarkovSpace()
         {
             // We can only parse the lists if they are initialized
@@ -322,20 +354,23 @@ namespace NameGenerator
                         AddOrIncrementDictionary(characterProbabilityPairs, word[i]);
                     }
 
-                    // Add the order-sized chunk to the probability
-                    string chunk = word.Substring(i - chain_order, chain_order);
+                    // Add the order-sized chunk to the probability and smaller order chunks as well
+                    for(int j = chain_order; j < chain_order + 1; j++)
+                    {
+                        string chunk = word.Substring(i - j, j);
 
-                    // Two cases: chunk already exists in dictionary or not
-                    if (stringProbabilityPairs.ContainsKey(chunk))
-                    {
-                        // Add <char, count> pair to the <chunk, <char, 1>> pair
-                        AddOrIncrementDictionary(stringProbabilityPairs[chunk], word[i]);
-                    }
-                    else
-                    {
-                        // Add the <chunk, <char, 1>> pair
-                        Dictionary<char, int> temp = new Dictionary<char, int> { { word[i], 1 } };
-                        stringProbabilityPairs.Add(chunk,temp);
+                        // Two cases: chunk already exists in dictionary or not
+                        if (stringProbabilityPairs.ContainsKey(chunk))
+                        {
+                            // Add <char, count> pair to the <chunk, <char, 1>> pair
+                            AddOrIncrementDictionary(stringProbabilityPairs[chunk], word[i]);
+                        }
+                        else
+                        {
+                            // Add the <chunk, <char, 1>> pair
+                            Dictionary<char, int> temp = new Dictionary<char, int> { { word[i], 1 } };
+                            stringProbabilityPairs.Add(chunk, temp);
+                        }
                     }
                 }
             }
